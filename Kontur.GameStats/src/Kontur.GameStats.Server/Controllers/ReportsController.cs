@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 using Kontur.GameStats.Server.Context;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kontur.GameStats.Server.Controllers
@@ -16,19 +16,17 @@ namespace Kontur.GameStats.Server.Controllers
             db = context;
         }
 
-        // GET /reports/recent-matches[/<count>]
+        // GET: /reports/recent-matches[/<count>]
         [ActionName("recent-matches")]
         public IEnumerable<object> RecentMatches(int count = 5)
         {
-            count = count < 1 ? 1 : count > 50 ? 50 : count;
-
             var query = db.Matches
-                .Include(s => s.ServerModel)
-                .Include(s => s.scoreboard)
-                .OrderByDescending(s => s.timestamp);
+                .Include(x => x.ServerModel)
+                .Include(x => x.scoreboard)
+                .OrderByDescending(x => x.timestamp);
 
-            return
-                query.Select(
+            return query
+                .Select(
                     x => new
                     {
                         server = x.ServerModel.endpoint,
@@ -36,79 +34,77 @@ namespace Kontur.GameStats.Server.Controllers
                             .ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"),
                         results = new
                         {
-                            map = x.map,
-                            gameMode = x.gameMode,
-                            fragLimit = x.fragLimit,
-                            timeLimit = x.timeLimit,
-                            timeElapsed = x.timeElapsed,
-                            scoreboard = x.scoreboard.Select(
-                                y => new
-                                {
-                                    name = y.name,
-                                    frags = y.frags,
-                                    kills = y.kills,
-                                    deaths = y.deaths
-                                }
+                            x.map,
+                            x.gameMode,
+                            x.fragLimit,
+                            x.timeLimit,
+                            x.timeElapsed,
+                            scoreboard = x.scoreboard
+                                .Select(
+                                    y => new
+                                    {
+                                        y.name,
+                                        y.frags,
+                                        y.kills,
+                                        y.deaths
+                                    }
                             )
                         }
                     }
-                ).Take(count);
+            ).Take(count < 50 ? count : 50);
         }
 
-        // GET /reports/best-players[/<count>]
+        // GET: /reports/best-players[/<count>]
         [ActionName("best-players")]
         public IEnumerable<object> BestPlayers(int count = 5)
         {
-            count = count < 1 ? 1 : count > 50 ? 50 : count;
-
             var query = db.ScoreBoards
-                .Include(s => s.MatcheModel)
-                    .ThenInclude(s => s.ServerModel);
+                .Include(x => x.MatcheModel)
+                .ThenInclude(x => x.ServerModel);
 
-            return
-                query.GroupBy(x => x.name)
-                .Select(y => new
-                {
-                    name = y.First().name,
-                    totalKills = y.Sum(x => x.kills),
-                    totalDeaths = y.Sum(x => x.deaths)
-                })
-                .Where(x => x.totalKills > 0 && x.totalDeaths >= 10)
-                .Select(x => new
-                {
-                    x.name,
-                    killToDeathRatio = (float)x.totalKills / x.totalDeaths
-                })
+            return query
+                .GroupBy(x => x.name)
+                .Select(
+                    x => new
+                    {
+                        x.First().name,
+                        playedMatches = x.Count(),
+                        totalKills = x.Sum(y => y.kills),
+                        totalDeaths = x.Sum(y => y.deaths)
+                    })
+                .Where(x => x.playedMatches >= 10 && x.totalDeaths >= 1)
+                .Select(
+                    x => new
+                    {
+                        x.name,
+                        killToDeathRatio = (float)x.totalKills / x.totalDeaths
+                    })
                 .OrderByDescending(x => x.killToDeathRatio)
-                .Take(count);
+                .Take(count < 50 ? count : 50);
         }
 
-        // GET /reports/popular-servers[/<count>]
+        // GET: /reports/popular-servers[/<count>]
         [ActionName("popular-servers")]
         public IEnumerable<object> PopularServers(int count = 5)
         {
-            count = count < 1 ? 1 : count > 50 ? 50 : count;
-
             var query = db.Servers
-                .Include(s => s.matches)
-                    .ThenInclude(m => m.scoreboard);
+                .Include(x => x.matches)
+                .ThenInclude(x => x.scoreboard);
 
-            return
-                query
-                .Select(y => new
-                {
-                    endpoint = y.endpoint,
-                    name = y.name,
-                    averageMatchesPerDay =
-                        y.matches.Any()
-                        ?
-                        y.matches.GroupBy(m => m.timestamp.Date)
-                        .Average(g => (float)g.Count())
-                        :
-                        0
-                })
+            return query
+                .Select(
+                    x => new
+                    {
+                        endpoint = x.endpoint,
+                        name = x.name,
+                        averageMatchesPerDay =
+                            x.matches.Any()
+                                ? x.matches.GroupBy(y => y.timestamp.Date)
+                                    .Average(y => (float)y.Count())
+                                : 0
+                    })
                 .OrderByDescending(x => x.averageMatchesPerDay)
-                .Take(count);
+                .Take(count < 50 ? count : 50);
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Kontur.GameStats.Server.Models;
 using Kontur.GameStats.Server.Context;
+using Kontur.GameStats.Server.Models;
 using Kontur.GameStats.Server.Models.DTO;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kontur.GameStats.Server.Controllers
@@ -19,17 +19,16 @@ namespace Kontur.GameStats.Server.Controllers
             db = context;
         }
 
-        // GET /servers/info
+        // GET: /servers/info
         [HttpGet("[action]")]
         public IEnumerable<object> Info()
         {
-            return
-                db.Servers
+            return db.Servers
                 .Include(x => x.gameModes)
                 .Select(
                     x => new
                     {
-                        endpoint = x.endpoint,
+                        x.endpoint,
                         info = new ServerInfoDTO
                         {
                             name = x.name,
@@ -38,8 +37,8 @@ namespace Kontur.GameStats.Server.Controllers
                     });
         }
 
-        // GET /servers/<endpoint>/info
-        [HttpGet("{endpoint}/[action]")]
+        // GET: /servers/<endpoint>/info
+        [HttpGet("{endpoint:endpoint}/[action]")]
         public IActionResult Info(string endpoint)
         {
             var query = db.Servers
@@ -53,21 +52,21 @@ namespace Kontur.GameStats.Server.Controllers
             var info = new ServerInfoDTO
             {
                 name = query.name,
-                gameModes = query.gameModes.Select(y => y.value).ToArray()
+                gameModes = query.gameModes.Select(x => x.value).ToArray()
             };
 
             return Ok(info);
         }
 
-        // PUT /servers/<endpoint>/info
-        [HttpPut("{endpoint}/[action]")]
+        // PUT: /servers/<endpoint>/info
+        [HttpPut("{endpoint:endpoint}/[action]")]
         public IActionResult Info(string endpoint, [FromBody] ServerInfoDTO server)
         {
             if (server == null || !ModelState.IsValid)
                 return BadRequest();
 
             var query = db.Servers
-                .Where(s => s.endpoint == endpoint)
+                .Where(x => x.endpoint == endpoint)
                 .Include(x => x.gameModes)
                 .FirstOrDefault();
 
@@ -75,8 +74,8 @@ namespace Kontur.GameStats.Server.Controllers
             {
                 endpoint = endpoint,
                 name = server.name,
-                gameModes = (
-                    server.gameModes.Select(
+                gameModes = (server.gameModes
+                    .Select(
                         x => new GameModeModel
                         {
                             value = x
@@ -95,14 +94,14 @@ namespace Kontur.GameStats.Server.Controllers
             return Ok();
         }
 
-        // GET /servers/<endpoint>/matches/<timestamp>
-        [HttpGet("{endpoint}/[action]/{timestamp:datetime}Z")]
+        // GET: /servers/<endpoint>/matches/<timestamp>
+        [HttpGet("{endpoint:endpoint}/[action]/{timestamp:datetime}Z")]
         public IActionResult Matches(string endpoint, DateTime timestamp)
         {
             var query = db.Servers
-                .Where(s => s.endpoint == endpoint)
+                .Where(x => x.endpoint == endpoint)
                 .Include(x => x.matches)
-                    .ThenInclude(y => y.scoreboard)
+                .ThenInclude(x => x.scoreboard)
                 .FirstOrDefault();
 
             if (query == null)
@@ -135,14 +134,11 @@ namespace Kontur.GameStats.Server.Controllers
             if (!match.Any())
                 return NotFound();
 
-            if (match.Count() == 1)
-                return Ok(match.First());
-
-            return Ok(match);
+            return match.Count() == 1 ? Ok(match.First()) : Ok(match);
         }
 
-        // PUT /servers/<endpoint>/matches/<timestamp>
-        [HttpPut("{endpoint}/[action]/{timestamp:datetime}Z")]
+        // PUT: /servers/<endpoint>/matches/<timestamp>
+        [HttpPut("{endpoint:endpoint}/[action]/{timestamp:datetime}Z")]
         public IActionResult Matches(string endpoint, DateTime timestamp,
             [FromBody] MatcheDTO match)
         {
@@ -150,7 +146,7 @@ namespace Kontur.GameStats.Server.Controllers
                 return BadRequest();
 
             var query = db.Servers
-                .Where(s => s.endpoint == endpoint)
+                .Where(x => x.endpoint == endpoint)
                 .Include(x => x.matches)
                 .FirstOrDefault();
 
@@ -165,14 +161,15 @@ namespace Kontur.GameStats.Server.Controllers
                 fragLimit = match.fragLimit,
                 timeLimit = match.timeLimit,
                 timeElapsed = match.timeElapsed,
-                scoreboard = match.scoreboard.Select(
-                    x => new ScoreBoardModel
-                    {
-                        name = x.name,
-                        frags = x.frags,
-                        kills = x.kills,
-                        deaths = x.deaths
-                    }).ToList()
+                scoreboard = match.scoreboard
+                    .Select(
+                        x => new ScoreBoardModel
+                        {
+                            name = x.name,
+                            frags = x.frags,
+                            kills = x.kills,
+                            deaths = x.deaths
+                        }).ToList()
             };
 
             query.matches.Add(model);

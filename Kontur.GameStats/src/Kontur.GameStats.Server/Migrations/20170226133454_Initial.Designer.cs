@@ -8,7 +8,7 @@ using Kontur.GameStats.Server.Context;
 namespace Kontur.GameStats.Server.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20170224113327_Initial")]
+    [Migration("20170226133454_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

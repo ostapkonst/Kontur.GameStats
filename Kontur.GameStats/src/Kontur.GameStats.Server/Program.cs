@@ -1,15 +1,20 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft​.Extensions​.CommandLineUtils;
+﻿using System;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace Kontur.GameStats.Server
 {
-    public class Program
+    public static class Program
     {
+        public static float HasValue(this float value, float other)
+        {
+            return float.IsNaN(value) || float.IsInfinity(value) ? other : value;
+        }
+
         public static bool IsValidURI(string uri)
         {
-            string pattern = @"^https?://[^/]"; // TODO: Дописать регулярное выражение
-            return Regex.IsMatch(uri ?? "", pattern, RegexOptions.IgnoreCase);
+            return Regex.IsMatch(uri ?? "", @"^https?://[^/]", RegexOptions.IgnoreCase);
         }
 
         public static void Main(string[] args)
@@ -30,7 +35,7 @@ namespace Kontur.GameStats.Server
                     .UseIISIntegration()
                     .UseStartup<Startup>();
 
-                string uri = prefix.Value();
+                var uri = prefix.Value();
                 if (IsValidURI(uri))
                     host.UseUrls(uri);
 

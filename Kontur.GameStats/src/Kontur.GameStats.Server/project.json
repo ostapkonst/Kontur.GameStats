@@ -1,6 +1,6 @@
 ﻿{
   "title": "Kontur Game Stats Server",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0-alpha2",
   "copyright": "Konstantinov O. V.",
   "description": "Collects statistics from the game servers and provides a REST interface for their control.",
   "dependencies": {
@@ -30,12 +30,10 @@
     "Serilog.Sinks.RollingFile": "3.3.0",
     "Serilog.Sinks.RollingFileAlternate": "2.0.7"
   },
-
   "tools": {
     "Microsoft.EntityFrameworkCore.Tools": "1.0.0-preview2-final",
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-preview2-final"
   },
-
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
@@ -44,20 +42,16 @@
       ]
     }
   },
-
   "buildOptions": {
     "emitEntryPoint": true,
     "copyToOutput": "appsettings.json"
   },
-
   "runtimeOptions": {
     "configProperties": {
       "System.GC.Server": true
     }
   },
-
   "publishOptions": "appsettings.json",
-
   "runtimes": {
     "win7-x86": {}
   }

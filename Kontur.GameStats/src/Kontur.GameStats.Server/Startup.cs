@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Kontur.GameStats.Server.Context;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Kontur.GameStats.Server.Context;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace Kontur.GameStats.Server
@@ -26,9 +29,12 @@ namespace Kontur.GameStats.Server
 
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = Configuration.GetConnectionString("DefaultConnection");
+            var connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DatabaseContext>(options =>
                 options.UseSqlite(connection));
+
+            services.Configure<RouteOptions>(options =>
+                options.ConstraintMap.Add("endpoint", typeof(EndpointConstraint)));
 
             services.AddMvc();
         }
@@ -45,6 +51,27 @@ namespace Kontur.GameStats.Server
             loggerFactory.AddSerilog();
 
             app.UseMvc();
+        }
+    }
+
+    public class EndpointConstraint : IRouteConstraint
+    {
+        public bool Match(HttpContext httpContext, IRouter route, string routeKey,
+            RouteValueDictionary values, RouteDirection routeDirection)
+        {
+            var endpoint = values[routeKey].ToString();
+
+            var pos = endpoint.LastIndexOf('-');
+            if (pos == -1) return false;
+
+            var port = endpoint.Substring(pos + 1);
+            var host = endpoint.Substring(0, pos);
+
+            int q;
+            return int.TryParse(port, out q)
+                && q >= 0
+                && q <= 65535
+                && Uri.CheckHostName(host) != UriHostNameType.Unknown;
         }
     }
 }

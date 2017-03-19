@@ -1,0 +1,25 @@
+﻿{
+  "version": "1.0.0-alpha2",
+  "testRunner": "xunit",
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.1",
+      "type": "platform"
+    },
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "xunit": "2.2.0",
+    "Microsoft.EntityFrameworkCore.InMemory": "1.0.2",
+    "Kontur.GameStats.Server": {
+      "version": "1.0.0-alpha2",
+      "target": "project"
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dotnet5.6",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}
