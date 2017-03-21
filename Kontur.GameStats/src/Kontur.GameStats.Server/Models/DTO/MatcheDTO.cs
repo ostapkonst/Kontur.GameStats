@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kontur.GameStats.Server.Models.DTO
 {
+    // При необходимости атрибут валидации можно отключить
     [Matche]
     public class MatcheDTO
     {
@@ -29,7 +30,7 @@ namespace Kontur.GameStats.Server.Models.DTO
                 && matche.scoreboard?.Count > 0
                 && matche.scoreboard.All(x => x.frags <= matche.fragLimit)
                 && matche.scoreboard.GroupBy(x => x.name).Count()
-                == matche.scoreboard.Count
+                    == matche.scoreboard.Count
                 // Т. к. OrderBy - не стабильная сортировка https://msdn.microsoft.com/en-us/library/dd383824.aspx
                 && matche.scoreboard
                     .Select((pair, index) => new { pair, index })

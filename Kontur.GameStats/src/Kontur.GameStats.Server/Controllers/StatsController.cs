@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Kontur.GameStats.Server.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -71,19 +69,14 @@ namespace Kontur.GameStats.Server.Controllers
 
             if (!query.Any()) return NotFound();
 
-            var MatchesPerDay = query
+            var matchesPerDay = query
                 .GroupBy(x => x.MatcheModel.timestamp.Date)
                 .Select(x => x.Count());
 
-            // Изначально поле totalMatchesWon инициализировал как:
-            // query.Count(x => x.frags == x.MatcheModel.scoreboard.Max(y => y.frags))
-            // Пришлось отказаться т. к. могут быть игроки с одинаковым количеством 
-            // фрагов, а победитель может быть только одним.
             var player = new
             {
                 totalMatchesPlayed = query.Count(),
-                totalMatchesWon = query
-                    .Count(x => x.place == 0),
+                totalMatchesWon = query.Count(x => x.place == 0),
                 favoriteServer = query
                     .GroupBy(x => x.MatcheModel.ServerModel.endpoint)
                     .OrderByDescending(x => x.Count())
@@ -112,8 +105,8 @@ namespace Kontur.GameStats.Server.Controllers
                         })
                     .Select(x => x.playersBelowCurrent * 100d / (x.totalPlayers - 1))
                     .Average(x => x.HasValue(100)),
-                maximumMatchesPerDay = MatchesPerDay.Max(),
-                averageMatchesPerDay = MatchesPerDay.Average(),
+                maximumMatchesPerDay = matchesPerDay.Max(),
+                averageMatchesPerDay = matchesPerDay.Average(),
                 lastMatchPlayed = query
                     .OrderByDescending(x => x.MatcheModel.timestamp)
                     .Select(x => x.MatcheModel.timestamp)

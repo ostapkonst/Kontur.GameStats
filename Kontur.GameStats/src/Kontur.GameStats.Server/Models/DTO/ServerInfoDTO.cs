@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kontur.GameStats.Server.Models.DTO
 {
+    // При необходимости атрибут валидации можно отключить
     [ServerInfo]
     public class ServerInfoDTO
     {
@@ -18,7 +19,9 @@ namespace Kontur.GameStats.Server.Models.DTO
 
             return info.name?.Trim().Length > 0
                 && info.gameModes?.Length > 0
-                && info.gameModes.All(x => x.Trim().Length > 0);
+                && info.gameModes.All(x => x.Trim().Length > 0)
+                && info.gameModes.Distinct().Count()
+                    == info.gameModes.Length;
         }
     }
 }

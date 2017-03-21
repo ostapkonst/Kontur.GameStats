@@ -2,6 +2,7 @@
 
 namespace Kontur.GameStats.Server.Models.DTO
 {
+    // При необходимости атрибут валидации можно отключить
     [ScoreBoard]
     public class ScoreBoardDTO
     {

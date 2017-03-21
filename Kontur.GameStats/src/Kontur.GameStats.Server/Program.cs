@@ -26,7 +26,7 @@ namespace Kontur.GameStats.Server
                     .UseStartup<Startup>();
 
                 var uri = prefix.Value();
-                if (IsValidURI(uri))
+                if (IsValidUri(uri))
                     host.UseUrls(uri);
 
                 host
@@ -39,7 +39,7 @@ namespace Kontur.GameStats.Server
             cmdLineApp.Execute(args);
         }
 
-        private static bool IsValidURI(string uri)
+        private static bool IsValidUri(string uri)
         {
             return Regex.IsMatch(uri ?? "", @"^https?://[^/]", RegexOptions.IgnoreCase);
         }

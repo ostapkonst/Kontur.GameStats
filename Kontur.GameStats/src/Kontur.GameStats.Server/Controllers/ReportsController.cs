@@ -18,6 +18,7 @@ namespace Kontur.GameStats.Server.Controllers
         }
 
         // GET: /reports/recent-matches[/<count>]
+        [HttpGet]
         [ActionName("recent-matches")]
         public IEnumerable<object> RecentMatches(int count = 5)
         {
@@ -47,14 +48,14 @@ namespace Kontur.GameStats.Server.Controllers
                                         y.frags,
                                         y.kills,
                                         y.deaths
-                                    }
-                            )
+                                    })
                         }
                     }
             ).Take(Math.Min(count, 50));
         }
 
         // GET: /reports/best-players[/<count>]
+        [HttpGet]
         [ActionName("best-players")]
         public IEnumerable<object> BestPlayers(int count = 5)
         {
@@ -67,7 +68,7 @@ namespace Kontur.GameStats.Server.Controllers
                 .Select(
                     x => new
                     {
-                        x.First().name,
+                        name = x.Key,
                         playedMatches = x.Count(),
                         totalKills = x.Sum(y => y.kills),
                         totalDeaths = x.Sum(y => y.deaths)
@@ -84,6 +85,7 @@ namespace Kontur.GameStats.Server.Controllers
         }
 
         // GET: /reports/popular-servers[/<count>]
+        [HttpGet]
         [ActionName("popular-servers")]
         public IEnumerable<object> PopularServers(int count = 5)
         {
@@ -97,8 +99,7 @@ namespace Kontur.GameStats.Server.Controllers
                     {
                         x.endpoint,
                         x.name,
-                        averageMatchesPerDay =
-                            x.matches
+                        averageMatchesPerDay = x.matches
                             .GroupBy(y => y.timestamp.Date)
                             .Select(y => y.Count())
                             .DefaultIfEmpty()

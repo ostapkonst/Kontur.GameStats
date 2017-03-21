@@ -127,11 +127,10 @@ namespace Kontur.GameStats.Server.Controllers
                     }
                 );
 
-            // Если у сервера есть матчи с одинаковым временем окончания
-            // такое может случиться, если на сервере было скинуто время
-            if (!match.Any()) return NotFound();
-
-            return match.Count() == 1 ? Ok(match.First()) : Ok(match);
+            if (match.Any())
+                return Ok(match.First());
+            else
+                return NotFound();
         }
 
         // PUT: /servers/<endpoint>/matches/<timestamp>
@@ -149,7 +148,8 @@ namespace Kontur.GameStats.Server.Controllers
                 .FirstOrDefault();
 
             if (query == null
-                || query.gameModes
+                || query.matches.Count(x => x.timestamp == timestamp) > 0
+                || query.gameModes // Проверка поддержки игрового режима
                     .Count(x => x.value == match.gameMode) == 0)
                 return BadRequest();
 

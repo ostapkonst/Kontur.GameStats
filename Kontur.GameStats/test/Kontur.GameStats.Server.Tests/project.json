@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.0-alpha3",
+  "version": "1.0.0-alpha4",
   "testRunner": "xunit",
   "dependencies": {
     "Microsoft.NETCore.App": {
@@ -10,7 +10,7 @@
     "xunit": "2.2.0",
     "Microsoft.EntityFrameworkCore.InMemory": "1.0.2",
     "Kontur.GameStats.Server": {
-      "version": "1.0.0-alpha3",
+      "version": "1.0.0-alpha4",
       "target": "project"
     }
   },
