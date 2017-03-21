@@ -1,6 +1,6 @@
 ﻿{
   "title": "Kontur Game Stats Server",
-  "version": "1.0.0-alpha2",
+  "version": "1.0.0-alpha3",
   "copyright": "Konstantinov O. V.",
   "description": "Collects statistics from the game servers and provides a REST interface for their control.",
   "dependencies": {

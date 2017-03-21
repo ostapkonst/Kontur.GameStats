@@ -8,7 +8,7 @@ using Kontur.GameStats.Server.Context;
 namespace Kontur.GameStats.Server.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20170226133454_Initial")]
+    [Migration("20170227134547_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,7 +39,7 @@ namespace Kontur.GameStats.Server.Migrations
 
                     b.Property<int>("ServerModelId");
 
-                    b.Property<int>("fragLimit");
+                    b.Property<uint>("fragLimit");
 
                     b.Property<string>("gameMode");
 
@@ -47,7 +47,7 @@ namespace Kontur.GameStats.Server.Migrations
 
                     b.Property<double>("timeElapsed");
 
-                    b.Property<int>("timeLimit");
+                    b.Property<uint>("timeLimit");
 
                     b.Property<DateTime>("timestamp");
 
@@ -65,13 +65,15 @@ namespace Kontur.GameStats.Server.Migrations
 
                     b.Property<int>("MatcheModelId");
 
-                    b.Property<int>("deaths");
+                    b.Property<uint>("deaths");
 
-                    b.Property<int>("frags");
+                    b.Property<uint>("frags");
 
-                    b.Property<int>("kills");
+                    b.Property<uint>("kills");
 
                     b.Property<string>("name");
+
+                    b.Property<int>("place");
 
                     b.HasKey("Id");
 

@@ -10,5 +10,4 @@ namespace Kontur.GameStats.Server.Models
         public List<GameModeModel> gameModes { get; set; }
         public List<MatcheModel> matches { get; set; }
     }
-
 }

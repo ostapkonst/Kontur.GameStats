@@ -41,13 +41,15 @@ namespace Kontur.GameStats.Server
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            // Можно просто перенести в конструктор DatabaseContext строку Database.Migrate()
+            // Можно просто перенести строку Database.Migrate() в конструктор DatabaseContext
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
                 context.Database.Migrate();
             }
 
+            // Логи в консоль вывода Visual Studio, если отлаживаем в IIS Express
+            loggerFactory.AddDebug();
             loggerFactory.AddSerilog();
 
             app.UseMvc();

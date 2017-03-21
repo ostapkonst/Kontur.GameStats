@@ -49,11 +49,11 @@ namespace Kontur.GameStats.Server.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Autoincrement", true),
                     ServerModelId = table.Column<int>(nullable: false),
-                    fragLimit = table.Column<int>(nullable: false),
+                    fragLimit = table.Column<uint>(nullable: false),
                     gameMode = table.Column<string>(nullable: true),
                     map = table.Column<string>(nullable: true),
                     timeElapsed = table.Column<double>(nullable: false),
-                    timeLimit = table.Column<int>(nullable: false),
+                    timeLimit = table.Column<uint>(nullable: false),
                     timestamp = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
@@ -74,10 +74,11 @@ namespace Kontur.GameStats.Server.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Autoincrement", true),
                     MatcheModelId = table.Column<int>(nullable: false),
-                    deaths = table.Column<int>(nullable: false),
-                    frags = table.Column<int>(nullable: false),
-                    kills = table.Column<int>(nullable: false),
-                    name = table.Column<string>(nullable: true)
+                    deaths = table.Column<uint>(nullable: false),
+                    frags = table.Column<uint>(nullable: false),
+                    kills = table.Column<uint>(nullable: false),
+                    name = table.Column<string>(nullable: true),
+                    place = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

@@ -46,8 +46,7 @@ namespace Kontur.GameStats.Server.Controllers
                 .Include(x => x.gameModes)
                 .FirstOrDefault();
 
-            if (query == null)
-                return NotFound();
+            if (query == null) return NotFound();
 
             var info = new ServerInfoDTO
             {
@@ -104,8 +103,7 @@ namespace Kontur.GameStats.Server.Controllers
                 .ThenInclude(x => x.scoreboard)
                 .FirstOrDefault();
 
-            if (query == null)
-                return NotFound();
+            if (query == null) return NotFound();
 
             var match = query.matches
                 .Where(x => x.timestamp == timestamp)
@@ -131,8 +129,7 @@ namespace Kontur.GameStats.Server.Controllers
 
             // Если у сервера есть матчи с одинаковым временем окончания
             // такое может случиться, если на сервере было скинуто время
-            if (!match.Any())
-                return NotFound();
+            if (!match.Any()) return NotFound();
 
             return match.Count() == 1 ? Ok(match.First()) : Ok(match);
         }
@@ -147,10 +144,13 @@ namespace Kontur.GameStats.Server.Controllers
 
             var query = db.Servers
                 .Where(x => x.endpoint == endpoint)
+                .Include(x => x.gameModes)
                 .Include(x => x.matches)
                 .FirstOrDefault();
 
-            if (query == null)
+            if (query == null
+                || query.gameModes
+                    .Count(x => x.value == match.gameMode) == 0)
                 return BadRequest();
 
             var model = new MatcheModel
@@ -163,8 +163,9 @@ namespace Kontur.GameStats.Server.Controllers
                 timeElapsed = match.timeElapsed,
                 scoreboard = match.scoreboard
                     .Select(
-                        x => new ScoreBoardModel
+                        (x, y) => new ScoreBoardModel
                         {
+                            place = y,
                             name = x.name,
                             frags = x.frags,
                             kills = x.kills,

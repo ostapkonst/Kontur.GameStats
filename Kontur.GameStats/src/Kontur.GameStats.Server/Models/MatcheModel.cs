@@ -9,8 +9,8 @@ namespace Kontur.GameStats.Server.Models
         public DateTime timestamp { get; set; } // Получаем через URL
         public string map { get; set; }
         public string gameMode { get; set; }
-        public int fragLimit { get; set; }
-        public int timeLimit { get; set; }
+        public uint fragLimit { get; set; }
+        public uint timeLimit { get; set; }
         public double timeElapsed { get; set; }
         public List<ScoreBoardModel> scoreboard { get; set; }
 

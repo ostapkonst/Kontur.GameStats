@@ -2,12 +2,22 @@
 
 namespace Kontur.GameStats.Server.Models.DTO
 {
+    [ScoreBoard]
     public class ScoreBoardDTO
     {
-        [Required]
         public string name { get; set; }
-        public int frags { get; set; }  // Если поля не указаны
-        public int kills { get; set; }  // в теле запроса, то
-        public int deaths { get; set; } // будут нулевыми
+        public uint frags { get; set; }  // Если поля не указаны
+        public uint kills { get; set; }  // в теле запроса, то
+        public uint deaths { get; set; } // будут нулевыми
+    }
+
+    public class ScoreBoardAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object value)
+        {
+            var score = value as ScoreBoardDTO;
+
+            return score.name?.Trim().Length > 0;
+        }
     }
 }

@@ -7,16 +7,6 @@ namespace Kontur.GameStats.Server
 {
     public static class Program
     {
-        public static float HasValue(this float value, float other)
-        {
-            return float.IsNaN(value) || float.IsInfinity(value) ? other : value;
-        }
-
-        public static bool IsValidURI(string uri)
-        {
-            return Regex.IsMatch(uri ?? "", @"^https?://[^/]", RegexOptions.IgnoreCase);
-        }
-
         public static void Main(string[] args)
         {
             var cmdLineApp = new CommandLineApplication(false);
@@ -47,6 +37,21 @@ namespace Kontur.GameStats.Server
             });
 
             cmdLineApp.Execute(args);
+        }
+
+        private static bool IsValidURI(string uri)
+        {
+            return Regex.IsMatch(uri ?? "", @"^https?://[^/]", RegexOptions.IgnoreCase);
+        }
+
+        public static double HasValue(this double value, double other)
+        {
+            return double.IsNaN(value) || double.IsInfinity(value) ? other : value;
+        }
+
+        public static string ToUtcZ(this DateTime date)
+        {
+            return date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'");
         }
     }
 }

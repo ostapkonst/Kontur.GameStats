@@ -27,31 +27,24 @@ namespace Kontur.GameStats.Server.Controllers
                 .ThenInclude(x => x.scoreboard)
                 .FirstOrDefault();
 
-            if (query == null)
-                return NotFound();
+            if (query == null) return NotFound();
 
-            var MatchesPerDay = query.matches
+            var matchesPerDay = query.matches
                 .GroupBy(x => x.timestamp.Date)
-                .Select(x => x.Count());
+                .Select(x => x.Count())
+                .DefaultIfEmpty();
 
-            // Если на сервере еще не было сыграно ни одного матча
-            if (!MatchesPerDay.Any())
-                MatchesPerDay = new List<int> { 0 };
-
-            var Population = query.matches
-                .Select(x => x.scoreboard.Count);
-
-            // Если игровой сервер вернул матч без списка игроков
-            if (!Population.Any())
-                Population = new List<int> { 0 };
+            var population = query.matches
+                .Select(x => x.scoreboard.Count)
+                .DefaultIfEmpty();
 
             var server = new
             {
                 totalMatchesPlayed = query.matches.Count,
-                maximumMatchesPerDay = MatchesPerDay.Max(),
-                averageMatchesPerDay = MatchesPerDay.Average(),
-                maximumPopulation = Population.Max(),
-                averagePopulation = Population.Average(),
+                maximumMatchesPerDay = matchesPerDay.Max(),
+                averageMatchesPerDay = matchesPerDay.Average(),
+                maximumPopulation = population.Max(),
+                averagePopulation = population.Average(),
                 top5GameModes = query.matches
                     .GroupBy(x => x.gameMode)
                     .OrderByDescending(x => x.Count())
@@ -76,18 +69,21 @@ namespace Kontur.GameStats.Server.Controllers
                 .Include(x => x.MatcheModel)
                 .ThenInclude(x => x.ServerModel);
 
-            if (!query.Any())
-                return NotFound();
+            if (!query.Any()) return NotFound();
 
             var MatchesPerDay = query
                 .GroupBy(x => x.MatcheModel.timestamp.Date)
                 .Select(x => x.Count());
 
+            // Изначально поле totalMatchesWon инициализировал как:
+            // query.Count(x => x.frags == x.MatcheModel.scoreboard.Max(y => y.frags))
+            // Пришлось отказаться т. к. могут быть игроки с одинаковым количеством 
+            // фрагов, а победитель может быть только одним.
             var player = new
             {
                 totalMatchesPlayed = query.Count(),
                 totalMatchesWon = query
-                    .Count(x => x.frags == x.MatcheModel.scoreboard.Max(y => y.frags)),
+                    .Count(x => x.place == 0),
                 favoriteServer = query
                     .GroupBy(x => x.MatcheModel.ServerModel.endpoint)
                     .OrderByDescending(x => x.Count())
@@ -106,10 +102,7 @@ namespace Kontur.GameStats.Server.Controllers
                         x => new
                         {
                             totalPlayers = x.MatcheModel.scoreboard.Count,
-                            playerStats =
-                                x.MatcheModel.scoreboard.OrderByDescending(y => y.frags)
-                                    .ToList()
-                                    .IndexOf(x)
+                            playerStats = x.place
                         }).ToList()
                     .Select(
                         x => new
@@ -117,17 +110,17 @@ namespace Kontur.GameStats.Server.Controllers
                             x.totalPlayers,
                             playersBelowCurrent = x.totalPlayers - 1 - x.playerStats
                         })
-                    .Select(x => (double)x.playersBelowCurrent / (x.totalPlayers - 1) * 100)
-                    .Average(x => double.IsNaN(x) ? 100 : x),
+                    .Select(x => x.playersBelowCurrent * 100d / (x.totalPlayers - 1))
+                    .Average(x => x.HasValue(100)),
                 maximumMatchesPerDay = MatchesPerDay.Max(),
                 averageMatchesPerDay = MatchesPerDay.Average(),
                 lastMatchPlayed = query
                     .OrderByDescending(x => x.MatcheModel.timestamp)
                     .Select(x => x.MatcheModel.timestamp)
                     .First()
-                    .ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"),
-                killToDeathRatio = 
-                    ((float)query.Sum(x => x.kills) / query.Sum(x => x.deaths)).HasValue(0)
+                    .ToUtcZ(),
+                killToDeathRatio =
+                    ((double)query.Sum(x => x.kills) / query.Sum(x => x.deaths)).HasValue(0)
             };
 
             return Ok(player);

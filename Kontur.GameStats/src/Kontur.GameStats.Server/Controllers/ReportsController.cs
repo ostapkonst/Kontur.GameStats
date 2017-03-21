@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Kontur.GameStats.Server.Context;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +31,7 @@ namespace Kontur.GameStats.Server.Controllers
                     x => new
                     {
                         server = x.ServerModel.endpoint,
-                        timestamp = x.timestamp
-                            .ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"),
+                        timestamp = x.timestamp.ToUtcZ(),
                         results = new
                         {
                             x.map,
@@ -51,7 +51,7 @@ namespace Kontur.GameStats.Server.Controllers
                             )
                         }
                     }
-            ).Take(count < 50 ? count : 50);
+            ).Take(Math.Min(count, 50));
         }
 
         // GET: /reports/best-players[/<count>]
@@ -77,10 +77,10 @@ namespace Kontur.GameStats.Server.Controllers
                     x => new
                     {
                         x.name,
-                        killToDeathRatio = (float)x.totalKills / x.totalDeaths
+                        killToDeathRatio = (double)x.totalKills / x.totalDeaths
                     })
                 .OrderByDescending(x => x.killToDeathRatio)
-                .Take(count < 50 ? count : 50);
+                .Take(Math.Min(count, 50));
         }
 
         // GET: /reports/popular-servers[/<count>]
@@ -95,16 +95,17 @@ namespace Kontur.GameStats.Server.Controllers
                 .Select(
                     x => new
                     {
-                        endpoint = x.endpoint,
-                        name = x.name,
+                        x.endpoint,
+                        x.name,
                         averageMatchesPerDay =
-                            x.matches.Any()
-                                ? x.matches.GroupBy(y => y.timestamp.Date)
-                                    .Average(y => (float)y.Count())
-                                : 0
+                            x.matches
+                            .GroupBy(y => y.timestamp.Date)
+                            .Select(y => y.Count())
+                            .DefaultIfEmpty()
+                            .Average()
                     })
                 .OrderByDescending(x => x.averageMatchesPerDay)
-                .Take(count < 50 ? count : 50);
+                .Take(Math.Min(count, 50));
         }
     }
 }
