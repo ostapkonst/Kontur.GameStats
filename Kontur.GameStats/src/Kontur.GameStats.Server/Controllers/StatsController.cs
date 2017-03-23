@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Kontur.GameStats.Server.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -63,7 +64,7 @@ namespace Kontur.GameStats.Server.Controllers
         public IActionResult Players(string name)
         {
             var query = db.ScoreBoards
-                .Where(x => x.name == name)
+                .Where(x => String.Equals(x.name, name, StringComparison.OrdinalIgnoreCase))
                 .Include(x => x.MatcheModel)
                 .ThenInclude(x => x.ServerModel);
 
@@ -96,7 +97,7 @@ namespace Kontur.GameStats.Server.Controllers
                         {
                             totalPlayers = x.MatcheModel.scoreboard.Count,
                             playerStats = x.place
-                        }).ToList()
+                        }).ToArray()
                     .Select(
                         x => new
                         {

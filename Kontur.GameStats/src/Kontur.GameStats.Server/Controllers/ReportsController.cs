@@ -61,10 +61,11 @@ namespace Kontur.GameStats.Server.Controllers
         {
             var query = db.ScoreBoards
                 .Include(x => x.MatcheModel)
-                .ThenInclude(x => x.ServerModel);
+                .ThenInclude(x => x.ServerModel)
+                .ToArray();
 
             return query
-                .GroupBy(x => x.name)
+                .GroupBy(x => x.name, StringComparer.OrdinalIgnoreCase)
                 .Select(
                     x => new
                     {

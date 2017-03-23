@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -29,7 +30,7 @@ namespace Kontur.GameStats.Server.Models.DTO
                 && matche.timeElapsed <= matche.timeLimit
                 && matche.scoreboard?.Count > 0
                 && matche.scoreboard.All(x => x.frags <= matche.fragLimit)
-                && matche.scoreboard.GroupBy(x => x.name).Count()
+                && matche.scoreboard.GroupBy(x => x.name, StringComparer.OrdinalIgnoreCase).Count()
                     == matche.scoreboard.Count
                 // Т. к. OrderBy - не стабильная сортировка https://msdn.microsoft.com/en-us/library/dd383824.aspx
                 && matche.scoreboard
